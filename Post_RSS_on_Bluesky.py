@@ -131,8 +131,6 @@ class BlueSkyTask:
                 except:
                     LOG.exception("Fatal Error posting to BS")
 
-            return
-
             if new_posts:
                 self.feed.last_post = datetime.datetime.strptime(new_posts[0].published, '%a, %d %b %Y %H:%M:%S %z')
             with open("last_scan_date.txt", "w") as f:
