@@ -88,6 +88,7 @@ class BlueSkyTask:
                 title = post["title"]
                 ftext = ""
                 images = []
+                
                 if "media_content" in post:
                     for media in post["media_content"]:
                         r = requests.get(media["url"])
@@ -101,7 +102,15 @@ class BlueSkyTask:
                         except:
                             LOG.exception("Fatal Error uploading image to BS")
 
-                
+                if "links" in post:
+                    for link in post["links"]:
+
+                        if link["type"] == "image/jpg":
+                            imgUrl = link["href"]
+                            r = requests.get(imgUrl)
+                            buf = io.BytesIO(r.content)
+                            upload = self.bs.com.atproto.repo.upload_blob(buf)
+                            medias_bs.append(atproto.models.AppBskyEmbedImages.Image(alt='Image de la news', image=upload.blob))
 
                 embed = models.AppBskyEmbedImages.Main(images=images)
 
@@ -120,16 +129,16 @@ class BlueSkyTask:
                             features=[models.AppBskyRichtextFacet.Link(uri=linkURL)],
                             index=models.AppBskyRichtextFacet.ByteSlice(byte_start=0, byte_end=len(title.encode('UTF-8'))),))
 
-                try:
-                    self.client.com.atproto.repo.create_record(
-                        models.ComAtprotoRepoCreateRecord.Data(
-                            repo=self.client.me.did,
-                            collection=models.ids.AppBskyFeedPost,
-                            record=models.AppBskyFeedPost.Main(created_at=self.client.get_current_time_iso(), text=newSummary, facets=facets, embed=embed),
-                        )
+
+                self.client.com.atproto.repo.create_record(
+                    models.ComAtprotoRepoCreateRecord.Data(
+                        repo=self.client.me.did,
+                        collection=models.ids.AppBskyFeedPost,
+                        record=models.AppBskyFeedPost.Main(created_at=self.client.get_current_time_iso(), text=newSummary, facets=facets, embed=embed),
                     )
-                except:
-                    LOG.exception("Fatal Error posting to BS")
+                )
+
+
 
             if new_posts:
                 self.feed.last_post = datetime.datetime.strptime(new_posts[0].published, '%a, %d %b %Y %H:%M:%S %z')
