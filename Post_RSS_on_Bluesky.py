@@ -109,8 +109,8 @@ class BlueSkyTask:
                             imgUrl = link["href"]
                             r = requests.get(imgUrl)
                             buf = io.BytesIO(r.content)
-                            upload = self.bs.com.atproto.repo.upload_blob(buf)
-                            medias_bs.append(atproto.models.AppBskyEmbedImages.Image(alt='Image de la news', image=upload.blob))
+                            upload = self.client.com.atproto.repo.upload_blob(buf)
+                            images.append(models.AppBskyEmbedImages.Image(alt='Image de la news', image=upload.blob))
 
                 embed = models.AppBskyEmbedImages.Main(images=images)
 
